@@ -1,0 +1,432 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enterprise AI Tools Evaluation Framework</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0e14;
+  --surface: #1a1a26;
+  --surface2: #22222e;
+  --border: #32324a;
+  --border2: #44445e;
+  --accent: #9d8fff;
+  --accent-dim: #5a52aa;
+  --accent-glow: rgba(157,143,255,0.1);
+  --highlight: #f08060;
+  --highlight-dim: rgba(240,128,96,0.12);
+  --text: #e8e8f4;
+  --text2: #b0b0cc;
+  --text3: #7070a0;
+  --good: #5fd890;
+  --good-bg: rgba(95,216,144,0.12);
+  --warn: #f0bc5a;
+  --warn-bg: rgba(240,188,90,0.12);
+  --danger: #f07070;
+  --danger-bg: rgba(240,112,112,0.12);
+  --mono: 'IBM Plex Mono', monospace;
+  --head: 'Syne', sans-serif;
+  --body: 'Inter', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--body); min-height: 100vh; font-size: 13px; }
+
+.app { max-width: 1080px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
+
+.header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+.eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+h1 { font-family: var(--head); font-size: clamp(1.6rem, 3.5vw, 2.4rem); font-weight: 800; line-height: 1.1; color: var(--text); letter-spacing: -0.02em; }
+h1 em { font-style: normal; color: var(--accent); }
+.header-row { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
+.header-desc { font-size: 12px; color: var(--text2); max-width: 500px; line-height: 1.7; }
+.author-block { text-align: right; }
+.author-name { font-family: var(--head); font-size: 13px; font-weight: 700; color: var(--text); }
+.author-meta { font-family: var(--mono); font-size: 9px; color: var(--text2); margin-top: 3px; line-height: 1.6; }
+
+.stats-bar { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 1.5rem; }
+.stat-cell { flex: 1; padding: 12px 16px; border-right: 1px solid var(--border); background: var(--surface); }
+.stat-cell:last-child { border-right: none; }
+.stat-n { font-family: var(--head); font-size: 1.4rem; font-weight: 800; color: var(--accent); }
+.stat-l { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text2); margin-top: 2px; }
+
+.pain-section { margin-bottom: 1.5rem; }
+.section-label { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text2); margin-bottom: 8px; }
+.pain-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(185px, 1fr)); gap: 6px; }
+.pain-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 9px 12px; cursor: pointer; transition: all 0.15s; }
+.pain-card:hover { border-color: var(--border2); }
+.pain-card.active { border-color: var(--accent-dim); background: var(--accent-glow); }
+.pain-title { font-size: 12px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+.pain-desc { font-size: 10px; color: var(--text2); line-height: 1.5; }
+
+.controls { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.25rem; align-items: center; }
+.ctrl-label { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text2); }
+.fbtn { background: var(--surface); border: 1px solid var(--border); color: var(--text2); font-family: var(--body); font-size: 11px; padding: 5px 11px; border-radius: 4px; cursor: pointer; transition: all 0.15s; }
+.fbtn:hover { border-color: var(--border2); color: var(--text); }
+.fbtn.active { background: var(--accent-glow); border-color: var(--accent-dim); color: var(--accent); }
+.sep { width: 1px; height: 18px; background: var(--border); }
+
+.detail-panel { background: var(--surface); border: 1px solid var(--accent-dim); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.25rem; display: none; }
+.detail-panel.open { display: block; animation: fadeUp 0.2s ease; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+.det-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; }
+.det-name { font-family: var(--head); font-size: 1.2rem; font-weight: 800; color: var(--text); }
+.det-sub { font-family: var(--mono); font-size: 10px; color: var(--text2); margin-top: 3px; }
+.close-btn { background: none; border: 1px solid var(--border2); color: var(--text2); font-family: var(--mono); font-size: 10px; padding: 4px 10px; border-radius: 4px; cursor: pointer; }
+.close-btn:hover { border-color: var(--accent); color: var(--accent); }
+.det-body { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; }
+@media(max-width:680px){.det-body{grid-template-columns:1fr}}
+.det-col h4 { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text2); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.det-list { list-style: none; }
+.det-list li { font-size: 12px; color: var(--text2); padding: 5px 0; border-bottom: 1px solid var(--border); display: flex; gap: 7px; line-height: 1.6; }
+.det-list.g li::before { content: '+'; color: var(--good); flex-shrink: 0; font-weight: 600; }
+.det-list.r li::before { content: '−'; color: var(--danger); flex-shrink: 0; font-weight: 600; }
+.det-list.n li::before { content: '·'; color: var(--text3); flex-shrink: 0; }
+.insight-box { background: var(--surface2); border-left: 2px solid var(--highlight); border-radius: 0 6px 6px 0; padding: 14px 16px; margin-top: 0; font-size: 12px; color: var(--text2); line-height: 1.8; grid-column: 1/-1; }
+.insight-label { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--highlight); display: block; margin-bottom: 8px; }
+
+.tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(295px, 1fr)); gap: 12px; margin-bottom: 2rem; }
+.tool-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.1rem 1.2rem; cursor: pointer; transition: all 0.15s; }
+.tool-card:hover { border-color: var(--border2); }
+.tool-card.open { border-color: var(--accent-dim); background: var(--surface2); }
+.card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.tool-name { font-family: var(--head); font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.2; }
+.tool-vendor { font-family: var(--mono); font-size: 9px; color: var(--text2); margin-top: 3px; }
+.score-wrap { flex-shrink: 0; position: relative; width: 42px; height: 42px; }
+.score-wrap svg { position: absolute; top: 0; left: 0; transform: rotate(-90deg); }
+.score-num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--head); font-size: 12px; font-weight: 800; }
+.cat-tag { display: inline-block; font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 7px; border-radius: 3px; border: 1px solid var(--border2); color: var(--text2); margin-bottom: 7px; }
+.tool-desc { font-size: 11px; color: var(--text2); line-height: 1.7; margin-bottom: 10px; }
+.bars { display: flex; flex-direction: column; gap: 5px; }
+.bar-row { display: flex; align-items: center; gap: 6px; }
+.bar-key { font-family: var(--mono); font-size: 9px; color: var(--text2); width: 76px; flex-shrink: 0; }
+.bar-track { flex: 1; height: 2px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+.bar-val { font-family: var(--mono); font-size: 9px; color: var(--text2); width: 22px; text-align: right; }
+.card-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); }
+.adopt-tag { font-family: var(--mono); font-size: 9px; padding: 3px 8px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
+.a-ready { background: var(--good-bg); color: var(--good); border: 1px solid rgba(95,216,144,0.2); }
+.a-pilot { background: var(--warn-bg); color: var(--warn); border: 1px solid rgba(240,188,90,0.2); }
+.a-watch { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(240,112,112,0.2); }
+.pain-fit { font-family: var(--mono); font-size: 9px; color: var(--text2); }
+.pain-fit span { color: var(--accent); font-weight: 500; }
+
+.roadmap-wrap { margin-top: 2.5rem; }
+.roadmap-head { font-family: var(--head); font-size: 1rem; font-weight: 800; color: var(--text); margin-bottom: 1rem; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.roadmap-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+@media(max-width:680px){.roadmap-grid{grid-template-columns:1fr}}
+.rm-col { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; }
+.rm-phase { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text2); margin-bottom: 4px; }
+.rm-title { font-family: var(--head); font-size: 13px; font-weight: 700; color: var(--highlight); margin-bottom: 10px; }
+.rm-item { font-size: 11px; color: var(--text2); padding: 5px 0; border-bottom: 1px solid var(--border); display: flex; gap: 6px; line-height: 1.6; }
+.rm-item::before { content: '›'; color: var(--text2); flex-shrink: 0; }
+.rm-item:last-child { border-bottom: none; }
+.empty { text-align: center; padding: 3rem; color: var(--text2); font-family: var(--mono); font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="header">
+  <div class="eyebrow">Enterprise Intelligence Series · v2.0 · 2026</div>
+  <h1>Enterprise AI Tools<br><em>Evaluation Framework</em></h1>
+  <div class="header-row">
+    <p class="header-desc">A practitioner's framework for evaluating AI tools against real enterprise pain points — governance, security, integration complexity, regulatory compliance, and total cost of ownership.</p>
+    <div class="author-block">
+      <div class="author-name">Vijay Joshi</div>
+      <div class="author-meta">Director, Enterprise Architecture · IEEE Researcher<br>AI Governance · Regulated Financial Services</div>
+    </div>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-cell"><div class="stat-n" id="s-total">0</div><div class="stat-l">Tools Evaluated</div></div>
+  <div class="stat-cell"><div class="stat-n" id="s-ready">0</div><div class="stat-l">Enterprise Ready</div></div>
+  <div class="stat-cell"><div class="stat-n" id="s-pilot">0</div><div class="stat-l">Pilot First</div></div>
+  <div class="stat-cell"><div class="stat-n" id="s-avg">0</div><div class="stat-l">Avg Score</div></div>
+</div>
+
+<div class="pain-section">
+  <div class="section-label">Filter by enterprise pain point</div>
+  <div class="pain-grid" id="pain-grid"></div>
+</div>
+
+<div class="controls">
+  <span class="ctrl-label">Category:</span>
+  <button class="fbtn active" data-cat="all">All</button>
+  <button class="fbtn" data-cat="LLM Platform">LLM</button>
+  <button class="fbtn" data-cat="Code Generation">Code Gen</button>
+  <button class="fbtn" data-cat="Agentic AI">Agentic</button>
+  <button class="fbtn" data-cat="Productivity">Productivity</button>
+  <button class="fbtn" data-cat="Data & MLOps">Data & MLOps</button>
+  <div class="sep"></div>
+  <span class="ctrl-label">Sort:</span>
+  <button class="fbtn active" data-sort="overall">Overall</button>
+  <button class="fbtn" data-sort="governance">Governance</button>
+  <button class="fbtn" data-sort="security">Security</button>
+  <button class="fbtn" data-sort="tco">TCO</button>
+</div>
+
+<div class="detail-panel" id="detail-panel"></div>
+<div class="tools-grid" id="tools-grid"></div>
+
+<div class="roadmap-wrap">
+  <div class="roadmap-head">Enterprise AI Adoption Roadmap</div>
+  <div class="roadmap-grid">
+    <div class="rm-col">
+      <div class="rm-phase">Phase 1 · 0–3 months</div>
+      <div class="rm-title">Assess & Govern</div>
+      <div class="rm-item">Establish AI Tools Governance Policy and Review Board</div>
+      <div class="rm-item">Conduct enterprise AI readiness assessment across business units</div>
+      <div class="rm-item">Define Responsible AI principles and acceptable use policy</div>
+      <div class="rm-item">Identify top workflow candidates with highest ROI and lowest regulatory risk</div>
+      <div class="rm-item">Procure pilot tools with Legal, Security, and Compliance sign-off</div>
+    </div>
+    <div class="rm-col">
+      <div class="rm-phase">Phase 2 · 3–9 months</div>
+      <div class="rm-title">Pilot & Measure</div>
+      <div class="rm-item">Deploy tools in controlled pilots with defined success metrics</div>
+      <div class="rm-item">Establish baselines and measure productivity, quality, and risk impact</div>
+      <div class="rm-item">Build internal AI Champions network across business units</div>
+      <div class="rm-item">Launch AI Center of Excellence with governance and enablement mandate</div>
+      <div class="rm-item">Evaluate vendor roadmaps and negotiate enterprise agreements</div>
+    </div>
+    <div class="rm-col">
+      <div class="rm-phase">Phase 3 · 9–18 months</div>
+      <div class="rm-title">Scale & Transform</div>
+      <div class="rm-item">Enterprise-wide deployment with role-based enablement programs</div>
+      <div class="rm-item">Implement multi-agent orchestration for complex workflow automation</div>
+      <div class="rm-item">Publish quarterly AI tools intelligence reports for executive leadership</div>
+      <div class="rm-item">Establish vendor co-development partnerships for capability gaps</div>
+      <div class="rm-item">Evolve governance to an AI-native operating architecture</div>
+    </div>
+  </div>
+</div>
+
+</div>
+<script>
+const PAINS = [
+  {id:'governance',label:'AI Governance & Risk',desc:'No framework for responsible AI adoption'},
+  {id:'shadow',label:'Shadow AI',desc:'Employees using unapproved tools undetected'},
+  {id:'integration',label:'Integration Complexity',desc:'AI tools that don\'t connect to enterprise systems'},
+  {id:'compliance',label:'Regulatory Compliance',desc:'PCI-DSS, SOX, HIPAA blocking adoption'},
+  {id:'tco',label:'Cost & TCO',desc:'Runaway AI spend with no clear ROI model'},
+  {id:'talent',label:'AI Talent & Enablement',desc:'Teams lack skills to operationalize AI tools'},
+  {id:'data',label:'Data Quality & Privacy',desc:'Poor data and privacy concerns limiting value'},
+  {id:'vendor',label:'Vendor Lock-in',desc:'Over-dependence on single AI vendors'},
+];
+
+const TOOLS = [
+  {id:1,name:'Claude (Anthropic)',vendor:'Anthropic',cat:'LLM Platform',
+   desc:'Constitutional AI-based frontier LLM with strong enterprise controls, long context, and transparent safety posture. Suited for regulated industries requiring explainability and auditability.',
+   scores:{governance:92,security:90,integration:82,compliance:88,tco:75,scalability:85},adoption:'Ready',
+   pain:{governance:95,shadow:70,integration:78,compliance:92,tco:72,talent:80,data:85,vendor:70},
+   strengths:['Constitutional AI design reduces hallucination risk in policy-sensitive workflows','200K token context for large document and contract processing','Strong audit logging and enterprise access controls','Purpose-built for agentic and multi-agent workflows'],
+   gaps:['No native image generation','Real-time data requires external tool integration','Smaller plugin ecosystem vs OpenAI'],
+   enterprise:'Addresses regulated-industry compliance and governance concerns directly. Strong fit for financial services, healthcare, and government where explainability is not optional.'},
+  {id:2,name:'GPT-4o Enterprise',vendor:'OpenAI',cat:'LLM Platform',
+   desc:'Market-leading multimodal LLM with broad enterprise adoption and extensive integrations. Strong brand recognition but data governance requires careful enterprise-specific configuration.',
+   scores:{governance:80,security:82,integration:92,compliance:78,tco:70,scalability:90},adoption:'Ready',
+   pain:{governance:75,shadow:85,integration:92,compliance:72,tco:68,talent:90,data:72,vendor:55},
+   strengths:['Broadest enterprise adoption and brand recognition','Native vision, audio, and code capability','Extensive plugin and integration ecosystem','ChatGPT Enterprise includes data isolation'],
+   gaps:['Data residency configuration is complex and requires dedicated security review','High cost at enterprise scale','Hallucination rates higher in complex multi-step reasoning tasks'],
+   enterprise:'Best answer for the shadow AI problem — employees already use it, so formalizing with the Enterprise tier reduces ungoverned usage. Regulated industries must complete a full data governance review before broad deployment.'},
+  {id:3,name:'GitHub Copilot Enterprise',vendor:'Microsoft / GitHub',cat:'Code Generation',
+   desc:'Most widely deployed AI coding assistant with deep IDE integration, enterprise SSO, and measurable developer productivity impact. The de-facto standard for AI-assisted software development at scale.',
+   scores:{governance:85,security:88,integration:96,compliance:84,tco:80,scalability:92},adoption:'Ready',
+   pain:{governance:80,shadow:88,integration:95,compliance:80,tco:82,talent:95,data:75,vendor:60},
+   strengths:['Deepest IDE integration — VS Code, JetBrains, Eclipse, Neovim','Enterprise SSO, policy controls, and audit logging','PR review, documentation, and test generation built in','Proven 30–55% faster code completion in enterprise studies'],
+   gaps:['Significant GitHub ecosystem dependency','Context limited to open files — not full codebase awareness','Copilot Workspace agentic mode still maturing'],
+   enterprise:'Directly addresses the AI talent and enablement pain. Developers adopt it with near-zero training friction and it reduces shadow AI risk by providing a sanctioned coding AI within existing toolchains.'},
+  {id:4,name:'Microsoft Copilot 365',vendor:'Microsoft',cat:'Productivity',
+   desc:'AI embedded across the full Microsoft 365 suite — Word, Excel, Teams, Outlook, PowerPoint. Highest potential reach for knowledge worker productivity in M365-invested enterprises.',
+   scores:{governance:90,security:94,integration:97,compliance:88,tco:72,scalability:90},adoption:'Ready',
+   pain:{governance:85,shadow:95,integration:97,compliance:85,tco:65,talent:88,data:80,vendor:45},
+   strengths:['Native M365 integration — no new systems required','Enterprise data stays within existing M365 compliance boundary','Teams meeting intelligence and auto-summarization','Broadest possible user reach with familiar UX'],
+   gaps:['Requires M365 E3/E5 licensing — significant additional cost','AI reasoning quality below frontier models for complex tasks','Deepens Microsoft vendor lock-in considerably'],
+   enterprise:'Best solution for shadow AI at knowledge worker scale — sanctioned, secure, within existing tools. TCO requires an honest M365 license tier assessment before commitment.'},
+  {id:5,name:'Cursor',vendor:'Cursor AI',cat:'Code Generation',
+   desc:'AI-native code editor with codebase-aware chat, multi-file editing, and agent-mode autonomous coding. Rapidly displacing traditional editors among engineering teams — with or without enterprise approval.',
+   scores:{governance:62,security:65,integration:75,compliance:58,tco:85,scalability:72},adoption:'Pilot',
+   pain:{governance:55,shadow:92,integration:72,compliance:52,tco:82,talent:90,data:55,vendor:70},
+   strengths:['Full codebase-aware context — understands entire project not just open files','Agent mode for autonomous multi-file refactoring','Model-agnostic — works with GPT-4, Claude, Gemini','High developer satisfaction and retention scores'],
+   gaps:['Enterprise SSO and admin controls still immature','Code privacy and data residency concerns unresolved at enterprise scale','No enterprise compliance certifications at scale'],
+   enterprise:'Primary enterprise risk is ungoverned shadow adoption. Developers adopt Cursor independently, creating IP exposure and data privacy risk. Enterprises must establish a sanctioned path quickly.'},
+  {id:6,name:'Gemini 1.5 Pro',vendor:'Google DeepMind',cat:'LLM Platform',
+   desc:'Google\'s frontier multimodal model with industry-leading 1M token context window. Strong for document-heavy enterprises and those with significant Google Workspace and GCP investments.',
+   scores:{governance:80,security:84,integration:86,compliance:80,tco:78,scalability:88},adoption:'Pilot',
+   pain:{governance:75,shadow:68,integration:85,compliance:78,tco:75,talent:72,data:80,vendor:58},
+   strengths:['1M+ token context — best available for large document analysis','Native Google Workspace and GCP integration','Multimodal — text, image, audio, and video','Vertex AI provides enterprise MLOps integration'],
+   gaps:['Agentic capabilities less mature than Claude or GPT-4o','Google\'s product discontinuation track record is a real enterprise risk','Gemini brand trust still building in regulated industries'],
+   enterprise:'Strong answer to data and integration complexity pain in GCP-heavy enterprises. The 1M context window addresses large proprietary document ingestion without chunking complexity.'},
+  {id:7,name:'LangChain / LangGraph',vendor:'LangChain Inc.',cat:'Agentic AI',
+   desc:'The dominant open-source framework for building LLM-powered applications and multi-agent systems. De-facto standard for enterprise engineering teams building custom agentic workflows and RAG pipelines.',
+   scores:{governance:65,security:62,integration:88,compliance:60,tco:90,scalability:78},adoption:'Pilot',
+   pain:{governance:60,shadow:45,integration:90,compliance:58,tco:88,talent:72,data:82,vendor:95},
+   strengths:['Model-agnostic — swap any LLM without rebuilding the stack','LangGraph for complex stateful multi-agent workflows','LangSmith for observability and trace debugging','Eliminates vendor lock-in at the orchestration layer'],
+   gaps:['Rapid API changes create significant maintenance burden in production','Security hardening required before enterprise deployment','Steep learning curve — requires strong dedicated engineering investment'],
+   enterprise:'The primary answer to vendor lock-in pain. Build your orchestration on LangGraph and swap underlying LLMs freely. Integration complexity and talent requirements are consistently underestimated.'},
+  {id:8,name:'Databricks AI / Unity Catalog',vendor:'Databricks',cat:'Data & MLOps',
+   desc:'Unified data intelligence platform with integrated AI governance, MLOps, and model lifecycle management. Industry-leading for enterprises requiring AI on proprietary data with regulatory-grade audit trails.',
+   scores:{governance:94,security:95,integration:82,compliance:93,tco:68,scalability:88},adoption:'Ready',
+   pain:{governance:92,shadow:55,integration:78,compliance:95,tco:65,talent:65,data:98,vendor:72},
+   strengths:['Unity Catalog provides end-to-end AI governance and data lineage','MLflow for model lifecycle management and full auditability','Mosaic AI for fine-tuning on proprietary enterprise data','SOC 2 Type II, HIPAA, and PCI-DSS compliant'],
+   gaps:['High cost — requires significant investment to realize full platform value','Complex to operate — needs dedicated data engineering capability','Overkill for enterprises without existing data platform maturity'],
+   enterprise:'The definitive answer to data quality and compliance pain. If your AI fails because of bad data or you cannot pass a regulatory audit on AI models, Databricks addresses both. ROI requires substantial data maturity as a prerequisite.'},
+  {id:9,name:'Llama 3 (Meta OSS)',vendor:'Meta AI / Open Source',cat:'LLM Platform',
+   desc:'Leading open-source LLM family enabling fully on-premise deployment with no data leaving enterprise infrastructure. Critical for maximum data sovereignty, proprietary fine-tuning, and long-term cost control.',
+   scores:{governance:88,security:97,integration:72,compliance:95,tco:92,scalability:80},adoption:'Pilot',
+   pain:{governance:85,shadow:40,integration:68,compliance:98,tco:95,talent:60,data:95,vendor:98},
+   strengths:['Full data sovereignty — nothing leaves your infrastructure','No per-token cost at scale — run on your own compute','Fine-tunable on proprietary enterprise data','No dependency on any vendor for core model capability'],
+   gaps:['Requires significant MLOps infrastructure investment to operationalize','Capability gap vs frontier closed models on complex reasoning','Security hardening of deployment is entirely the enterprise\'s responsibility'],
+   enterprise:'The only real simultaneous answer to both vendor lock-in and regulatory data sovereignty. For highly regulated environments where data cannot leave premises, Llama on private cloud is often the only viable path.'},
+  {id:10,name:'Perplexity Enterprise Pro',vendor:'Perplexity AI',cat:'Productivity',
+   desc:'AI-powered research and intelligence platform with real-time web grounding and cited sources. Purpose-built for knowledge workers needing fast, auditable research with current information.',
+   scores:{governance:75,security:78,integration:65,compliance:72,tco:88,scalability:70},adoption:'Pilot',
+   pain:{governance:65,shadow:80,integration:60,compliance:68,tco:85,talent:82,data:65,vendor:72},
+   strengths:['Real-time web grounding eliminates knowledge cutoff limitations','Cited sources support audit and compliance documentation','Enterprise privacy mode keeps queries off training pipelines','Fast multi-source synthesis for research-heavy teams'],
+   gaps:['Not a workflow automation or code generation tool','Limited enterprise admin controls vs M365 or Claude','Narrow use case — research and intelligence only'],
+   enterprise:'High-ROI, low-risk pilot for strategy, legal, compliance, and M&A teams. Not a broad enterprise AI platform play — evaluate it as a targeted productivity tool.'},
+  {id:11,name:'Salesforce Agentforce',vendor:'Salesforce',cat:'Agentic AI',
+   desc:'Enterprise agentic AI platform for automating CRM-adjacent business workflows. Purpose-built for enterprises already deeply invested in the Salesforce ecosystem requiring governed, auditable agents.',
+   scores:{governance:90,security:92,integration:78,compliance:88,tco:65,scalability:82},adoption:'Pilot',
+   pain:{governance:88,shadow:65,integration:72,compliance:85,tco:60,talent:70,data:72,vendor:45},
+   strengths:['Enterprise-grade governance and audit built in from the start','Pre-built agents for sales, service, and marketing workflows','Deep Data Cloud integration for personalized AI at scale','Familiar Salesforce admin model reduces enablement burden'],
+   gaps:['Requires full Salesforce ecosystem — minimal standalone value','High licensing cost on top of existing Salesforce spend','Deep lock-in — exit strategy is complex and expensive'],
+   enterprise:'Addresses governance and compliance pain for Salesforce-native enterprises but dramatically worsens vendor lock-in. Negotiate data portability terms carefully before committing at scale.'},
+  {id:12,name:'AWS Bedrock',vendor:'Amazon Web Services',cat:'LLM Platform',
+   desc:'Managed multi-model AI platform on AWS infrastructure, offering Claude, Llama, Titan, and others within a single governed environment. Strong for AWS-native enterprises with existing compliance frameworks.',
+   scores:{governance:88,security:92,integration:90,compliance:90,tco:72,scalability:92},adoption:'Ready',
+   pain:{governance:85,shadow:72,integration:90,compliance:92,tco:70,talent:75,data:85,vendor:78},
+   strengths:['Multi-model access — Claude, Llama, Mistral, Titan in one governed place','Inherits AWS enterprise compliance certifications','VPC isolation — data never traverses public internet','Guardrails for content filtering and PII redaction at the platform level'],
+   gaps:['Deepens AWS dependency significantly — real lock-in tradeoff','Model versions lag behind direct provider APIs','Cost governance requires dedicated FinOps discipline at scale'],
+   enterprise:'Best answer for AWS-native enterprises facing compliance and integration complexity pain — one governed platform instead of multiple vendor contracts. Trades multi-cloud flexibility for operational simplicity.'},
+];
+
+const BAR_COLORS={governance:'#9d8fff',security:'#5baee8',integration:'#5fd890',compliance:'#c07ee0',tco:'#f0bc5a'};
+let activePain=null,activeCat='all',activeSort='overall',openId=null;
+
+function overall(t){const s=t.scores;return Math.round((s.governance+s.security+s.integration+s.compliance+s.tco+s.scalability)/6);}
+function scoreColor(v){return v>=85?'#5fd890':v>=70?'#f0bc5a':'#f07070';}
+
+function renderPains(){
+  document.getElementById('pain-grid').innerHTML=PAINS.map(p=>`
+    <div class="pain-card${activePain===p.id?' active':''}" onclick="togglePain('${p.id}')">
+      <div class="pain-title">${p.label}</div>
+      <div class="pain-desc">${p.desc}</div>
+    </div>`).join('');
+}
+
+function togglePain(id){activePain=activePain===id?null:id;renderPains();renderCards();}
+
+function renderStats(){
+  document.getElementById('s-total').textContent=TOOLS.length;
+  document.getElementById('s-ready').textContent=TOOLS.filter(t=>t.adoption==='Ready').length;
+  document.getElementById('s-pilot').textContent=TOOLS.filter(t=>t.adoption==='Pilot').length;
+  document.getElementById('s-avg').textContent=Math.round(TOOLS.reduce((a,t)=>a+overall(t),0)/TOOLS.length);
+}
+
+function renderCards(){
+  let list=activeCat==='all'?[...TOOLS]:TOOLS.filter(t=>t.cat===activeCat);
+  list.sort((a,b)=>{
+    if(activeSort==='overall')return overall(b)-overall(a);
+    if(activeSort==='governance')return b.scores.governance-a.scores.governance;
+    if(activeSort==='security')return b.scores.security-a.scores.security;
+    if(activeSort==='tco')return b.scores.tco-a.scores.tco;
+    return 0;
+  });
+  const bars=[{k:'governance',l:'Governance'},{k:'security',l:'Security'},{k:'integration',l:'Integration'},{k:'compliance',l:'Compliance'},{k:'tco',l:'TCO Value'}];
+  const circ=2*Math.PI*16;
+  document.getElementById('tools-grid').innerHTML=list.map(t=>{
+    const ov=overall(t);const sc=scoreColor(ov);const dash=(ov/100)*circ;
+    const ac=t.adoption==='Ready'?'a-ready':t.adoption==='Pilot'?'a-pilot':'a-watch';
+    const pain=activePain?t.pain[activePain]:null;
+    return `<div class="tool-card${openId===t.id?' open':''}" onclick="openTool(${t.id})">
+      <div class="card-top">
+        <div><div class="tool-name">${t.name}</div><div class="tool-vendor">${t.vendor}</div></div>
+        <div class="score-wrap">
+          <svg width="42" height="42" viewBox="0 0 42 42">
+            <circle cx="21" cy="21" r="16" fill="none" stroke="#2a2a40" stroke-width="3"/>
+            <circle cx="21" cy="21" r="16" fill="none" stroke="${sc}" stroke-width="3" stroke-dasharray="${dash.toFixed(1)} ${circ.toFixed(1)}" stroke-linecap="round"/>
+          </svg>
+          <div class="score-num" style="color:${sc}">${ov}</div>
+        </div>
+      </div>
+      <div class="cat-tag">${t.cat}</div>
+      <div class="tool-desc">${t.desc.substring(0,115)}...</div>
+      <div class="bars">${bars.map(b=>`<div class="bar-row">
+        <div class="bar-key">${b.l}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${t.scores[b.k]}%;background:${BAR_COLORS[b.k]}"></div></div>
+        <div class="bar-val">${t.scores[b.k]}</div>
+      </div>`).join('')}</div>
+      <div class="card-foot">
+        <span class="adopt-tag ${ac}">${t.adoption==='Ready'?'Enterprise Ready':t.adoption==='Pilot'?'Pilot First':'Watch & Wait'}</span>
+        ${pain?`<span class="pain-fit">Pain fit: <span>${pain}/100</span></span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function openTool(id){
+  if(openId===id){openId=null;document.getElementById('detail-panel').classList.remove('open');renderCards();return;}
+  openId=id;renderCards();
+  const t=TOOLS.find(x=>x.id===id);const ov=overall(t);
+  const panel=document.getElementById('detail-panel');
+  panel.innerHTML=`
+    <div class="det-head">
+      <div><div class="det-name">${t.name}</div><div class="det-sub">${t.vendor} · ${t.cat} · Overall ${ov}/100</div></div>
+      <button class="close-btn" onclick="openTool(${id})">Close ✕</button>
+    </div>
+    <div class="det-body">
+      <div class="det-col">
+        <h4>Strengths</h4>
+        <ul class="det-list g">${t.strengths.map(s=>`<li>${s}</li>`).join('')}</ul>
+      </div>
+      <div class="det-col">
+        <h4>Risks & Gaps</h4>
+        <ul class="det-list r">${t.gaps.map(g=>`<li>${g}</li>`).join('')}</ul>
+      </div>
+      <div class="det-col">
+        <h4>Pain Relevance</h4>
+        <ul class="det-list n">${PAINS.map(p=>`<li>${p.label}: <strong style="color:var(--accent);margin-left:auto">${t.pain[p.id]}/100</strong></li>`).join('')}</ul>
+      </div>
+      <div class="insight-box">
+        <span class="insight-label">Practitioner Assessment · Vijay Joshi · EA & AI Governance</span>
+        <span id="ins-${id}" style="font-style:italic;color:var(--text3)">Loading insight...</span>
+      </div>
+    </div>`;
+  panel.classList.add('open');
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,
+        messages:[{role:'user',content:`You are Vijay Joshi, a Director of Enterprise Architecture with 20 years in regulated financial services and deep expertise in AI governance and agentic AI. Write a concise practitioner assessment (4–5 sentences) of "${t.name}" by ${t.vendor} for enterprise technology leaders. Focus on: (1) the real enterprise pain it solves or fails to solve, (2) what most enterprises get wrong when evaluating or adopting it, (3) one honest watch-out vendors won't tell you. Be direct and practitioner-level — not marketing language. First person.`}]})
+    });
+    const data=await res.json();
+    const text=data.content?.find(b=>b.type==='text')?.text||t.enterprise;
+    const el=document.getElementById(`ins-${id}`);
+    if(el){el.textContent=text;el.style.fontStyle='normal';el.style.color='var(--text2)';}
+  }catch(e){
+    const el=document.getElementById(`ins-${id}`);
+    if(el){el.textContent=t.enterprise;el.style.fontStyle='normal';el.style.color='var(--text2)';}
+  }
+}
+
+document.querySelectorAll('[data-cat]').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('[data-cat]').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');activeCat=b.dataset.cat;openId=null;
+  document.getElementById('detail-panel').classList.remove('open');renderCards();
+}));
+document.querySelectorAll('[data-sort]').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('[data-sort]').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');activeSort=b.dataset.sort;renderCards();
+}));
+
+renderPains();renderStats();renderCards();
+</script>
+</body>
+</html>
