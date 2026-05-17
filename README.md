@@ -4,7 +4,7 @@ A practitioner-built tool for evaluating AI tools through the lens of real enter
 
 Built by **Vijay Joshi** · Director, Enterprise Architecture
 
-🔗 [Live Demo](https://vijayjoshi)
+🔗 [Live Demo](https://vijayjoshi24.github.io/enterprise-ai-tools-evaluation-framework/)
 
 
 ## Why I Built This
